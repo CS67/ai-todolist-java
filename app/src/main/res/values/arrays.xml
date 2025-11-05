@@ -12,4 +12,15 @@
         <item>light</item>
         <item>dark</item>
     </string-array>
+
+    <!-- 默认视图选项 -->
+    <string-array name="default_view_entries">
+        <item>所有任务</item>
+        <item>日历视图</item>
+    </string-array>
+
+    <string-array name="default_view_values">
+        <item>all_tasks</item>
+        <item>calendar</item>
+    </string-array>
 </resources>

@@ -46,6 +46,13 @@
             android:label="@string/settings"
             android:parentActivityName="com.example.tasks.MainActivity"
             android:theme="@style/Theme.TodoList" />
+        
+        <activity
+            android:name="com.example.tasks.ui.CalendarActivity"
+            android:exported="false"
+            android:label="日历视图"
+            android:parentActivityName="com.example.tasks.MainActivity"
+            android:theme="@style/Theme.TodoList" />
     </application>
 
 </manifest>

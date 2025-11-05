@@ -38,6 +38,16 @@
             app:iconSpaceReserved="true" />
 
         <ListPreference
+            android:key="default_view"
+            android:title="默认视图"
+            android:summary="选择应用启动时的默认视图"
+            android:entries="@array/default_view_entries"
+            android:entryValues="@array/default_view_values"
+            android:defaultValue="all_tasks"
+            android:icon="@android:drawable/ic_menu_view"
+            app:iconSpaceReserved="true" />
+
+        <ListPreference
             android:key="theme_mode"
             android:title="主题模式"
             android:summary="选择应用的主题模式"

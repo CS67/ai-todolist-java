@@ -3,21 +3,19 @@ package com.example.tasks;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.tasks.adapter.OnTodoClickListener;
-import com.example.tasks.adapter.TodoAdapter;
 import com.example.tasks.database.TodoDatabase;
 import com.example.tasks.databinding.ActivityMainBinding;
 import com.example.tasks.repository.TodoRepository;
 import com.example.tasks.ui.AddTodoDialogFragment;
+import com.example.tasks.ui.AllTasksFragment;
+import com.example.tasks.ui.CalendarFragment;
 import com.example.tasks.ui.EditTodoDialogFragment;
 import com.example.tasks.ui.SettingsActivity;
 import com.example.tasks.viewmodel.TodoViewModel;
@@ -25,10 +23,7 @@ import com.example.tasks.viewmodel.TodoViewModel;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private TodoViewModel viewModel;
-    private TodoAdapter incompleteAdapter;
-    private TodoAdapter completedAdapter;
-    private boolean isCompletedExpanded = false;
-    private boolean isIncompleteExpanded = true;
+    private boolean isCalendarView = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +45,16 @@ public class MainActivity extends AppCompatActivity {
         TodoViewModel.Factory factory = new TodoViewModel.Factory(repository);
         viewModel = new ViewModelProvider(this, factory).get(TodoViewModel.class);
 
-        // 设置RecyclerView
-        setupRecyclerViews();
-
         // 设置观察者
         setupObservers();
 
         // 设置点击事件
         setupClickListeners();
+
+        // 加载默认视图
+        if (savedInstanceState == null) {
+            loadDefaultView();
+        }
     }
     
     /**
@@ -81,85 +78,60 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupRecyclerViews() {
-        // 设置未完成任务RecyclerView
-        incompleteAdapter = new TodoAdapter();
-        binding.recyclerViewIncomplete.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerViewIncomplete.setAdapter(incompleteAdapter);
+    /**
+     * 加载默认视图
+     */
+    private void loadDefaultView() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String defaultView = prefs.getString("default_view", "all_tasks");
+        
+        if ("calendar".equals(defaultView)) {
+            showCalendarView();
+        } else {
+            showAllTasksView();
+        }
+    }
 
-        // 设置已完成任务RecyclerView
-        completedAdapter = new TodoAdapter();
-        binding.recyclerViewCompleted.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerViewCompleted.setAdapter(completedAdapter);
+    /**
+     * 切换视图
+     */
+    private void toggleView() {
+        if (isCalendarView) {
+            showAllTasksView();
+        } else {
+            showCalendarView();
+        }
+    }
 
-        // 设置适配器回调
-        OnTodoClickListener todoClickListener = new OnTodoClickListener() {
-            @Override
-            public void onTodoToggle(String todoId) {
-                viewModel.toggleTodoCompletion(todoId);
-            }
+    /**
+     * 显示所有任务视图
+     */
+    private void showAllTasksView() {
+        isCalendarView = false;
+        binding.btnToggleView.setIconResource(R.drawable.ic_calendar_view_24);
+        
+        Fragment fragment = new AllTasksFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
+    }
 
-            @Override
-            public void onTodoDelete(String todoId) {
-                viewModel.deleteTodo(todoId);
-            }
-
-            @Override
-            public void onTodoEdit(String todoId) {
-                viewModel.startEditingTodo(todoId);
-            }
-
-            @Override
-            public void onSubTaskToggle(String todoId, String subTaskId) {
-                viewModel.toggleSubTaskCompletion(todoId, subTaskId);
-            }
-            
-            @Override
-            public void onAddSubTask(String todoId, String subTaskTitle) {
-                viewModel.addSubTask(todoId, subTaskTitle);
-            }
-        };
-
-        incompleteAdapter.setOnTodoClickListener(todoClickListener);
-        completedAdapter.setOnTodoClickListener(todoClickListener);
+    /**
+     * 显示日历视图
+     */
+    private void showCalendarView() {
+        isCalendarView = true;
+        binding.btnToggleView.setIconResource(R.drawable.ic_view_list_24);
+        
+        Fragment fragment = new CalendarFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
     }
 
     private void setupObservers() {
-        // 观察Todo列表并分类
-        viewModel.getAllTodos().observe(this, todos -> {
-            if (todos != null) {
-                // 分离未完成和已完成任务
-                java.util.List<com.example.tasks.data.Todo> incompleteTodos = new java.util.ArrayList<>();
-                java.util.List<com.example.tasks.data.Todo> completedTodos = new java.util.ArrayList<>();
-                
-                for (com.example.tasks.data.Todo todo : todos) {
-                    if (todo.isCompleted()) {
-                        completedTodos.add(todo);
-                    } else {
-                        incompleteTodos.add(todo);
-                    }
-                }
-                
-                // 更新适配器
-                incompleteAdapter.submitList(incompleteTodos);
-                completedAdapter.submitList(completedTodos);
-                
-                // 更新UI和计数
-                updateCategoryCounts(incompleteTodos.size(), completedTodos.size());
-                updateUI(todos.size());
-            }
-        });
-
-        // 观察统计数据
-        viewModel.getTotalCount().observe(this, count -> 
-            binding.tvTotalCount.setText(String.valueOf(count)));
-            
-        viewModel.getCompletedCount().observe(this, count -> 
-            binding.tvCompletedCount.setText(String.valueOf(count)));
-            
-        viewModel.getIncompleteCount().observe(this, count -> 
-            binding.tvIncompleteCount.setText(String.valueOf(count)));
-        
         // 观察编辑Todo
         viewModel.getEditingTodo().observe(this, todo -> {
             if (todo != null) {
@@ -171,62 +143,14 @@ public class MainActivity extends AppCompatActivity {
     private void setupClickListeners() {
         binding.fabAddTodo.setOnClickListener(v -> showAddTodoDialog());
         
+        // 切换视图按钮
+        binding.btnToggleView.setOnClickListener(v -> toggleView());
+        
         // 设置按钮
         binding.btnSettings.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
         });
-        
-        // 未完成分类折叠/展开
-        binding.headerIncomplete.setOnClickListener(v -> toggleIncompleteSection());
-        
-        // 已完成分类折叠/展开
-        binding.headerCompleted.setOnClickListener(v -> toggleCompletedSection());
-    }
-    
-    private void toggleIncompleteSection() {
-        isIncompleteExpanded = !isIncompleteExpanded;
-        
-        if (isIncompleteExpanded) {
-            binding.recyclerViewIncomplete.setVisibility(View.VISIBLE);
-            binding.iconIncompleteExpand.setImageResource(R.drawable.ic_expand_less_24);
-        } else {
-            binding.recyclerViewIncomplete.setVisibility(View.GONE);
-            binding.iconIncompleteExpand.setImageResource(R.drawable.ic_expand_more_24);
-        }
-    }
-    
-    private void toggleCompletedSection() {
-        isCompletedExpanded = !isCompletedExpanded;
-        
-        if (isCompletedExpanded) {
-            binding.recyclerViewCompleted.setVisibility(View.VISIBLE);
-            binding.iconCompletedExpand.setImageResource(R.drawable.ic_expand_less_24);
-        } else {
-            binding.recyclerViewCompleted.setVisibility(View.GONE);
-            binding.iconCompletedExpand.setImageResource(R.drawable.ic_expand_more_24);
-        }
-    }
-    
-    private void updateCategoryCounts(int incompleteCount, int completedCount) {
-        binding.chipIncompleteCount.setText(String.valueOf(incompleteCount));
-        binding.chipCompletedCount.setText(String.valueOf(completedCount));
-        
-        // 更新分类标题
-        binding.tvIncompleteTitle.setText(getString(R.string.incomplete_section, incompleteCount));
-        binding.tvCompletedTitle.setText(getString(R.string.completed_section, completedCount));
-    }
-
-    private void updateUI(int todoCount) {
-        if (todoCount == 0) {
-            binding.emptyStateLayout.setVisibility(View.VISIBLE);
-            binding.nestedScrollView.setVisibility(View.GONE);
-            binding.statsCard.setVisibility(View.GONE);
-        } else {
-            binding.emptyStateLayout.setVisibility(View.GONE);
-            binding.nestedScrollView.setVisibility(View.VISIBLE);
-            binding.statsCard.setVisibility(View.VISIBLE);
-        }
     }
 
     private void showAddTodoDialog() {
