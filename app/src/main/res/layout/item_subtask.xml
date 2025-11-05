@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp"
+    android:paddingVertical="4dp"
+    android:paddingHorizontal="4dp"
     android:gravity="center_vertical"
     android:background="?attr/selectableItemBackground">
 
@@ -12,20 +13,23 @@
         android:id="@+id/checkbox_subtask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp" />
+        android:layout_marginEnd="4dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp" />
 
     <TextView
         android:id="@+id/tv_subtask_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+        android:textSize="13sp"
         tools:text="子任务示例" />
 
     <ImageButton
         android:id="@+id/btn_add_subtask_here"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="添加子任务"
         android:src="@drawable/ic_add_24"

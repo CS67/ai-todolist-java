@@ -126,26 +126,23 @@ public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
                 binding.tvCreatedAt.setVisibility(View.GONE);
             }
             
-            // 设置子任务进度
-            if (todo.getSubTasks().isEmpty()) {
-                binding.layoutSubtasks.setVisibility(View.GONE);
-            } else {
-                binding.layoutSubtasks.setVisibility(View.VISIBLE);
-                // 总是更新子任务进度
-                updateSubTaskProgress(todo);
-                
-                // 设置展开/折叠按钮图标
-                binding.btnToggleSubtasks.setIconResource(
-                    isSubTasksExpanded ? R.drawable.ic_expand_less_24 : R.drawable.ic_expand_more_24
-                );
-                
-                // 显示/隐藏子任务列表
-                binding.layoutSubtaskList.setVisibility(isSubTasksExpanded ? View.VISIBLE : View.GONE);
-                
-                // 如果展开了，重新渲染子任务列表以反映最新状态
-                if (isSubTasksExpanded) {
-                    populateSubTasks(todo);
-                }
+            // 子任务框始终显示，保持所有item大小一致
+            binding.layoutSubtasks.setVisibility(View.VISIBLE);
+            
+            // 更新子任务进度
+            updateSubTaskProgress(todo);
+            
+            // 设置展开/折叠按钮图标
+            binding.btnToggleSubtasks.setIconResource(
+                isSubTasksExpanded ? R.drawable.ic_expand_less_24 : R.drawable.ic_expand_more_24
+            );
+            
+            // 显示/隐藏子任务列表
+            binding.layoutSubtaskList.setVisibility(isSubTasksExpanded ? View.VISIBLE : View.GONE);
+            
+            // 如果展开了，重新渲染子任务列表以反映最新状态
+            if (isSubTasksExpanded) {
+                populateSubTasks(todo);
             }
             
             // 设置点击事件
@@ -169,7 +166,9 @@ public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
             
             // 展开/折叠子任务按钮
             binding.btnToggleSubtasks.setOnClickListener(v -> {
-                boolean newState = !isSubTasksExpanded;
+                // 从HashMap获取当前状态
+                boolean currentState = expandedStates.getOrDefault(todo.getId(), false);
+                boolean newState = !currentState;
                 expandedStates.put(todo.getId(), newState);
                 
                 binding.btnToggleSubtasks.setIconResource(
@@ -251,8 +250,14 @@ public class TodoAdapter extends ListAdapter<Todo, TodoAdapter.TodoViewHolder> {
         private void updateSubTaskProgress(Todo todo) {
             int completed = todo.getCompletedSubTasksCount();
             int total = todo.getSubTasks().size();
-            binding.tvSubtaskProgress.setText("子任务: " + completed + "/" + total + " 已完成");
-            binding.progressSubtasks.setProgress((int) (todo.getSubTaskProgress() * 100));
+            
+            if (total == 0) {
+                binding.tvSubtaskProgress.setText("暂无子任务");
+                binding.progressSubtasks.setProgress(0);
+            } else {
+                binding.tvSubtaskProgress.setText("子任务 " + completed + "/" + total);
+                binding.progressSubtasks.setProgress((int) (todo.getSubTaskProgress() * 100));
+            }
         }
         
         /**

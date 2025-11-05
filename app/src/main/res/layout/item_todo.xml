@@ -204,7 +204,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="8dp">
 
                     <!-- 子任务头部 -->
                     <LinearLayout
@@ -214,8 +214,8 @@
                         android:gravity="center_vertical">
 
                         <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
                             android:src="@drawable/ic_list_24"
                             app:tint="?attr/colorPrimary" />
 
@@ -224,19 +224,19 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="8dp"
-                            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                            android:layout_marginStart="6dp"
+                            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             tools:text="子任务 2/3" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_toggle_subtasks"
                             style="@style/Widget.Material3.Button.IconButton"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
                             android:contentDescription="展开子任务"
                             app:icon="@drawable/ic_expand_more_24"
-                            app:iconSize="20dp"
+                            app:iconSize="18dp"
                             app:iconTint="?attr/colorPrimary" />
 
                     </LinearLayout>
@@ -246,11 +246,11 @@
                         android:id="@+id/progress_subtasks"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="6dp"
                         app:indicatorColor="?attr/colorPrimary"
                         app:trackColor="?attr/colorOutlineVariant"
-                        app:trackCornerRadius="4dp"
-                        app:trackThickness="6dp"
+                        app:trackCornerRadius="3dp"
+                        app:trackThickness="4dp"
                         android:max="100"
                         tools:progress="67" />
 
@@ -259,7 +259,7 @@
                         android:id="@+id/layout_subtask_list"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="6dp"
                         android:orientation="vertical"
                         android:visibility="gone" />
 

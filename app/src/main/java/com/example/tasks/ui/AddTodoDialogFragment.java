@@ -41,7 +41,6 @@ import java.util.concurrent.Future;
  */
 public class AddTodoDialogFragment extends DialogFragment {
     
-    private static final int SPEECH_REQUEST_CODE = 1000;
     private static final int AI_SPEECH_REQUEST_CODE = 1001;
     
     private DialogAddTodoBinding binding;
@@ -167,9 +166,6 @@ public class AddTodoDialogFragment extends DialogFragment {
         
         // 选择日期时间按钮（合并）
         binding.btnSelectDatetime.setOnClickListener(v -> showDateTimePicker());
-        
-        // 语音输入（标题）
-        binding.layoutTitle.setEndIconOnClickListener(view -> startVoiceInput());
         
         // AI模式切换按钮
         binding.btnToggleAiMode.setOnClickListener(v -> toggleAiMode());
@@ -383,36 +379,16 @@ public class AddTodoDialogFragment extends DialogFragment {
         dialog.show();
     }
     
-    private void startVoiceInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.CHINESE);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "zh-CN");
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "请说出任务内容");
-        
-        try {
-            startActivityForResult(intent, SPEECH_REQUEST_CODE);
-        } catch (Exception e) {
-            Toast.makeText(getContext(), "语音识别不可用", Toast.LENGTH_SHORT).show();
-        }
-    }
-    
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
-        if (resultCode == getActivity().RESULT_OK && data != null) {
+        if (requestCode == AI_SPEECH_REQUEST_CODE && resultCode == getActivity().RESULT_OK && data != null) {
             ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (results != null && !results.isEmpty()) {
                 String spokenText = results.get(0);
-                
-                if (requestCode == SPEECH_REQUEST_CODE) {
-                    // 标题语音输入
-                    binding.etTitle.setText(spokenText);
-                } else if (requestCode == AI_SPEECH_REQUEST_CODE) {
-                    // AI模式语音输入
-                    binding.etAiInput.setText(spokenText);
-                }
+                // AI模式语音输入
+                binding.etAiInput.setText(spokenText);
             }
         }
     }
