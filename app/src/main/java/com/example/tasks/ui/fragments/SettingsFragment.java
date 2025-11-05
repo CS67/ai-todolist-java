@@ -69,7 +69,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
      * 显示API密钥获取教程
      */
     private void showApiKeyHelp() {
-        String helpMessage = "📝 获取DeepSeek API密钥步骤：\n\n" +
+        String helpMessage = "获取DeepSeek API密钥步骤：\n\n" +
                 "1️⃣ 访问官网\n" +
                 "   打开浏览器访问：\n" +
                 "   https://platform.deepseek.com\n\n" +
