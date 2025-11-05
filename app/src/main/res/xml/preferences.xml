@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="AI功能设置"
+        android:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:key="deepseek_api_key"
+            android:title="DeepSeek API密钥"
+            android:summary="配置DeepSeek API密钥以启用AI智能解析功能"
+            android:dialogTitle="输入DeepSeek API密钥"
+            android:dialogMessage="请输入您的DeepSeek API密钥，可以在 https://platform.deepseek.com 获取"
+            android:inputType="textPassword"
+            android:icon="@android:drawable/ic_dialog_info"
+            app:iconSpaceReserved="true" />
+
+        <Preference
+            android:key="ai_help"
+            android:title="如何获取API密钥"
+            android:summary="点击查看获取DeepSeek API密钥的详细步骤"
+            android:icon="@android:drawable/ic_menu_help"
+            app:iconSpaceReserved="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="应用设置"
+        android:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="auto_ai_parse"
+            android:title="自动AI解析"
+            android:summary="输入任务时自动触发AI解析"
+            android:defaultValue="false"
+            android:icon="@android:drawable/ic_menu_manage"
+            app:iconSpaceReserved="true" />
+
+        <ListPreference
+            android:key="theme_mode"
+            android:title="主题模式"
+            android:summary="选择应用的主题模式"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:defaultValue="system"
+            android:icon="@android:drawable/ic_menu_view"
+            app:iconSpaceReserved="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="关于"
+        android:iconSpaceReserved="false">
+
+        <Preference
+            android:key="version"
+            android:title="版本信息"
+            android:summary="JTasks v1.0.0"
+            android:icon="@android:drawable/ic_dialog_info"
+            app:iconSpaceReserved="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

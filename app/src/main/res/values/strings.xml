@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">Tasks</string>
+    
+    <!-- 主界面 -->
+    <string name="todo_list_title">Tasks</string>
+    <string name="incomplete_tasks_count">还有 %d 个未完成任务</string>
+    <string name="add_task">添加任务</string>
+    <string name="clear_completed">清除已完成任务</string>
+    
+    <!-- 统计 -->
+    <string name="total_tasks">总任务</string>
+    <string name="completed_tasks">已完成</string>
+    <string name="incomplete_tasks">待完成</string>
+    
+    <!-- 分组标题 -->
+    <string name="incomplete_section">待完成 (%d)</string>
+    <string name="completed_section">已完成 (%d)</string>
+    
+    <!-- 添加任务对话框 -->
+    <string name="add_new_task">添加新任务</string>
+    <string name="task_title">任务标题 *</string>
+    <string name="task_description">任务描述（可选）</string>
+    <string name="cancel">取消</string>
+    <string name="add">添加</string>
+    
+    <!-- 空状态 -->
+    <string name="no_tasks">还没有任务</string>
+    <string name="add_first_task">点击右下角的 + 按钮添加第一个任务</string>
+    
+    <!-- 时间格式 -->
+    <string name="created_at">创建于 %s</string>
+    <string name="completed_at">完成于 %s</string>
+    
+    <!-- 操作 -->
+    <string name="delete">删除</string>
+    <string name="mark_completed">标记为已完成</string>
+    <string name="mark_incomplete">标记为未完成</string>
+    
+    <!-- AI 和语音功能 -->
+    <string name="ai_add_task">AI智能添加</string>
+    <string name="voice_input">语音输入</string>
+    <string name="stop_recording">停止录音</string>
+    <string name="voice_input_hint">点击麦克风按钮进行中文语音输入</string>
+    <string name="listening">正在听取语音输入，请说话...</string>
+    <string name="microphone_permission_needed">需要麦克风权限才能使用语音输入</string>
+    <string name="speech_not_available">设备不支持语音识别</string>
+    <string name="speech_recognition_failed">语音识别取消或失败</string>
+    
+    <!-- 设置 -->
+    <string name="settings">设置</string>
+</resources>
