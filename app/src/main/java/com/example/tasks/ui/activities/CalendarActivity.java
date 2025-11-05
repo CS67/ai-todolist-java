@@ -1,22 +1,21 @@
-package com.example.tasks.ui;
+package com.example.tasks.ui.activities;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CalendarView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.tasks.adapter.OnTodoClickListener;
-import com.example.tasks.adapter.TodoAdapter;
-import com.example.tasks.data.Todo;
-import com.example.tasks.databinding.FragmentCalendarBinding;
-import com.example.tasks.viewmodel.TodoViewModel;
+import com.example.tasks.ui.adapters.OnTodoClickListener;
+import com.example.tasks.ui.adapters.TodoAdapter;
+import com.example.tasks.data.models.Todo;
+import com.example.tasks.data.database.TodoDatabase;
+import com.example.tasks.databinding.ActivityCalendarBinding;
+import com.example.tasks.data.repositories.TodoRepository;
+import com.example.tasks.ui.viewmodel.TodoViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,29 +23,26 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class CalendarFragment extends Fragment {
+/**
+ * 日历视图Activity
+ */
+public class CalendarActivity extends AppCompatActivity {
     
-    private FragmentCalendarBinding binding;
+    private ActivityCalendarBinding binding;
     private TodoViewModel viewModel;
     private TodoAdapter incompleteAdapter;
     private TodoAdapter completedAdapter;
     private long selectedDateMillis;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault());
     
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentCalendarBinding.inflate(inflater, container, false);
-        return binding.getRoot();
-    }
-    
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityCalendarBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         
-        // 从Activity获取ViewModel
-        viewModel = new ViewModelProvider(requireActivity()).get(TodoViewModel.class);
-        
+        setupToolbar();
+        setupViewModel();
         setupRecyclerViews();
         setupCalendar();
         
@@ -56,15 +52,29 @@ public class CalendarFragment extends Fragment {
         loadTasksForDate(selectedDateMillis);
     }
     
+    private void setupToolbar() {
+        setSupportActionBar(binding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+    
+    private void setupViewModel() {
+        TodoDatabase database = TodoDatabase.getDatabase(this);
+        TodoRepository repository = new TodoRepository(database.todoDao());
+        TodoViewModel.Factory factory = new TodoViewModel.Factory(repository);
+        viewModel = new ViewModelProvider(this, factory).get(TodoViewModel.class);
+    }
+    
     private void setupRecyclerViews() {
         // 设置未完成任务RecyclerView
         incompleteAdapter = new TodoAdapter();
-        binding.recyclerViewIncomplete.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerViewIncomplete.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewIncomplete.setAdapter(incompleteAdapter);
         
         // 设置已完成任务RecyclerView
         completedAdapter = new TodoAdapter();
-        binding.recyclerViewCompleted.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.recyclerViewCompleted.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewCompleted.setAdapter(completedAdapter);
         
         // 设置适配器回调
@@ -81,7 +91,7 @@ public class CalendarFragment extends Fragment {
             
             @Override
             public void onTodoEdit(String todoId) {
-                viewModel.startEditingTodo(todoId);
+                // 日历视图不支持编辑，可以跳转回主页面或显示提示
             }
             
             @Override
@@ -123,7 +133,7 @@ public class CalendarFragment extends Fragment {
      * 加载指定日期的任务
      */
     private void loadTasksForDate(long dateMillis) {
-        viewModel.getAllTodos().observe(getViewLifecycleOwner(), todos -> {
+        viewModel.getAllTodos().observe(this, todos -> {
             if (todos != null) {
                 // 获取选中日期的开始和结束时间戳
                 Calendar startOfDay = Calendar.getInstance();
@@ -195,8 +205,17 @@ public class CalendarFragment extends Fragment {
     }
     
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         binding = null;
     }
 }

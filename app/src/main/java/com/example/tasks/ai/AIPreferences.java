@@ -1,4 +1,4 @@
-package com.example.tasks.preferences;
+package com.example.tasks.ai;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,11 +1,11 @@
-package com.example.tasks.repository;
+package com.example.tasks.data.repositories;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 
-import com.example.tasks.data.Todo;
-import com.example.tasks.database.TodoDao;
-import com.example.tasks.database.TodoEntity;
+import com.example.tasks.data.models.Todo;
+import com.example.tasks.data.database.TodoDao;
+import com.example.tasks.data.database.TodoEntity;
 
 import java.util.ArrayList;
 import java.util.List;

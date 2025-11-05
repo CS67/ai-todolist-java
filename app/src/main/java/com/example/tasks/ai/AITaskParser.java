@@ -1,8 +1,8 @@
 package com.example.tasks.ai;
 
-import com.example.tasks.data.Priority;
-import com.example.tasks.data.SubTask;
-import com.example.tasks.data.Todo;
+import com.example.tasks.data.models.Priority;
+import com.example.tasks.data.models.SubTask;
+import com.example.tasks.data.models.Todo;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -25,7 +25,6 @@ import okhttp3.Response;
 
 /**
  * AI任务解析器 - 使用DeepSeek API解析自然语言输入
- * 注意：这个版本简化了AI功能，主要提供基础解析
  */
 public class AITaskParser {
     private static final String API_URL = "https://api.deepseek.com/v1/chat/completions";

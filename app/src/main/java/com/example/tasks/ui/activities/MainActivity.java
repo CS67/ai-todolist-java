@@ -1,24 +1,25 @@
-package com.example.tasks;
+package com.example.tasks.ui.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
-import com.example.tasks.database.TodoDatabase;
+import com.example.tasks.R;
+import com.example.tasks.data.database.TodoDatabase;
+import com.example.tasks.data.models.Todo;
 import com.example.tasks.databinding.ActivityMainBinding;
-import com.example.tasks.repository.TodoRepository;
-import com.example.tasks.ui.AddTodoDialogFragment;
-import com.example.tasks.ui.AllTasksFragment;
-import com.example.tasks.ui.CalendarFragment;
-import com.example.tasks.ui.EditTodoDialogFragment;
-import com.example.tasks.ui.SettingsActivity;
-import com.example.tasks.viewmodel.TodoViewModel;
+import com.example.tasks.data.repositories.TodoRepository;
+import com.example.tasks.ui.fragments.AddTodoDialogFragment;
+import com.example.tasks.ui.fragments.AllTasksFragment;
+import com.example.tasks.ui.fragments.CalendarFragment;
+import com.example.tasks.ui.fragments.EditTodoDialogFragment;
+import com.example.tasks.ui.viewmodel.TodoViewModel;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -161,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.show(getSupportFragmentManager(), "AddTodoDialog");
     }
     
-    private void showEditTodoDialog(com.example.tasks.data.Todo todo) {
+    private void showEditTodoDialog(Todo todo) {
         EditTodoDialogFragment dialog = new EditTodoDialogFragment();
         dialog.setTodo(todo);
         dialog.setOnTodoUpdatedListener((todoId, title, description, priority, dueDate, subTasks) -> {

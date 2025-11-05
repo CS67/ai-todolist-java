@@ -1,4 +1,4 @@
-package com.example.tasks.ui;
+package com.example.tasks.ui.fragments;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,9 +22,10 @@ import androidx.preference.PreferenceManager;
 import com.example.tasks.R;
 import com.example.tasks.ai.AITaskParser;
 import com.example.tasks.ai.ParsedTask;
-import com.example.tasks.data.Priority;
-import com.example.tasks.data.SubTask;
-import com.example.tasks.databinding.DialogAddTodoBinding;
+import com.example.tasks.data.models.Priority;
+import com.example.tasks.data.models.SubTask;
+import com.example.tasks.data.models.Todo;
+import com.example.tasks.databinding.DialogEditTodoBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,17 +36,17 @@ import java.util.Locale;
 import java.util.concurrent.Future;
 
 /**
- * 添加Todo对话框
+ * 编辑Todo对话框
  */
-public class AddTodoDialogFragment extends DialogFragment {
+public class EditTodoDialogFragment extends DialogFragment {
     
     private static final int AI_SPEECH_REQUEST_CODE = 1001;
     
-    private DialogAddTodoBinding binding;
-    private OnTodoAddedListener listener;
+    private DialogEditTodoBinding binding;
+    private OnTodoUpdatedListener listener;
+    private Todo todo;
     private Long selectedDueDate = null;
     private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm", Locale.getDefault());
-    private List<String> subTaskTitles = new ArrayList<>();
     
     // 日期时间组件
     private Calendar selectedCalendar = Calendar.getInstance();
@@ -58,12 +57,16 @@ public class AddTodoDialogFragment extends DialogFragment {
     private Future<ParsedTask> aiParseTask;
     private boolean isAiModeEnabled = false;
     
-    public interface OnTodoAddedListener {
-        void onTodoAdded(String title, String description, Priority priority, Long dueDate, List<SubTask> subTasks);
+    public interface OnTodoUpdatedListener {
+        void onTodoUpdated(String todoId, String title, String description, Priority priority, Long dueDate, List<SubTask> subTasks);
     }
     
-    public void setOnTodoAddedListener(OnTodoAddedListener listener) {
+    public void setOnTodoUpdatedListener(OnTodoUpdatedListener listener) {
         this.listener = listener;
+    }
+    
+    public void setTodo(Todo todo) {
+        this.todo = todo;
     }
     
     @NonNull
@@ -92,7 +95,7 @@ public class AddTodoDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = DialogAddTodoBinding.inflate(inflater, container, false);
+        binding = DialogEditTodoBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
     
@@ -101,8 +104,12 @@ public class AddTodoDialogFragment extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         
         initializeAI();
+        
+        if (todo != null) {
+            populateTodoData();
+        }
+        
         setupClickListeners();
-        setupTextWatcher();
         checkAutoAIMode();
     }
     
@@ -112,9 +119,6 @@ public class AddTodoDialogFragment extends DialogFragment {
         
         if (!apiKey.isEmpty()) {
             aiParser = new AITaskParser(apiKey);
-        } else {
-            // 隐藏AI相关按钮，如果没有配置API Key
-            binding.btnAiParse.setVisibility(View.GONE);
         }
     }
     
@@ -133,159 +137,25 @@ public class AddTodoDialogFragment extends DialogFragment {
         }
     }
     
-    private void setupTextWatcher() {
-        binding.etTitle.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String text = s.toString().trim();
-                // 当输入超过10个字符且包含完整描述时显示AI解析按钮
-                if (aiParser != null && text.length() > 10 && 
-                    (text.contains("明天") || text.contains("下周") || text.contains("紧急") || 
-                     text.contains("重要") || text.contains("包括") || text.contains("需要"))) {
-                    binding.btnAiParse.setVisibility(View.VISIBLE);
-                } else if (aiParser != null) {
-                    binding.btnAiParse.setVisibility(View.GONE);
-                    binding.cardAiResult.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-    }
-    
-    private void setupClickListeners() {
-        // 取消按钮
-        binding.btnCancel.setOnClickListener(v -> dismiss());
+    private void populateTodoData() {
+        // 设置标题和描述
+        binding.etTitle.setText(todo.getTitle());
+        binding.etDescription.setText(todo.getDescription());
         
-        // 添加按钮
-        binding.btnAdd.setOnClickListener(v -> addTodo());
+        // 设置优先级
+        setPriorityChip(todo.getPriority());
         
-        // 选择日期时间按钮（合并）
-        binding.btnSelectDatetime.setOnClickListener(v -> showDateTimePicker());
-        
-        // AI模式切换按钮
-        binding.btnToggleAiMode.setOnClickListener(v -> toggleAiMode());
-        
-        // AI输入语音按钮
-        binding.layoutAiInput.setEndIconOnClickListener(view -> startAiVoiceInput());
-        
-        // AI分析按钮
-        binding.btnAiAnalyze.setOnClickListener(v -> performAIAnalysisFromAiInput());
-        
-        // 添加子任务按钮
-        binding.btnAddSubtask.setOnClickListener(v -> addSubTaskInput());
-        
-        // AI解析按钮（保留旧的）
-        binding.btnAiParse.setOnClickListener(v -> performAIAnalysis());
-        
-        // 应用AI解析结果
-        binding.btnApplyAi.setOnClickListener(v -> applyAIResult());
-        
-        // 忽略AI解析结果
-        binding.btnDismissAi.setOnClickListener(v -> binding.cardAiResult.setVisibility(View.GONE));
-    }
-    
-    /**
-     * 显示日期时间选择器（先选日期，再选时间）
-     */
-    private void showDateTimePicker() {
-        showDatePicker();
-    }
-    
-    private void performAIAnalysis() {
-        if (aiParser == null) {
-            Toast.makeText(getContext(), "请先配置DeepSeek API密钥", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        String input = binding.etTitle.getText().toString().trim();
-        if (input.isEmpty()) {
-            Toast.makeText(getContext(), "请先输入任务描述", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        
-        // 显示加载状态
-        binding.btnAiParse.setText("🤖 AI分析中...");
-        binding.btnAiParse.setEnabled(false);
-        
-        // 异步执行AI解析
-        aiParseTask = aiParser.parseTaskAsync(input);
-        
-        // 在后台线程等待结果
-        new Thread(() -> {
-            try {
-                ParsedTask result = aiParseTask.get();
-                // 切换到主线程更新UI
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        currentParsedTask = result;
-                        showAIResult(result);
-                        binding.btnAiParse.setText("🤖 AI智能解析任务");
-                        binding.btnAiParse.setEnabled(true);
-                    });
-                }
-            } catch (Exception e) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(), "AI解析失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        binding.btnAiParse.setText("🤖 AI智能解析任务");
-                        binding.btnAiParse.setEnabled(true);
-                    });
-                }
-            }
-        }).start();
-    }
-    
-    private void showAIResult(ParsedTask parsedTask) {
-        binding.tvAiReasoning.setText("分析结果：" + parsedTask.getReasoning());
-        binding.cardAiResult.setVisibility(View.VISIBLE);
-    }
-    
-    private void applyAIResult() {
-        if (currentParsedTask == null) return;
-        
-        // 应用标题
-        if (!currentParsedTask.getTitle().isEmpty()) {
-            binding.etTitle.setText(currentParsedTask.getTitle());
-        }
-        
-        // 应用描述
-        if (!currentParsedTask.getDescription().isEmpty()) {
-            binding.etDescription.setText(currentParsedTask.getDescription());
-        }
-        
-        // 应用优先级
-        setPriorityChip(currentParsedTask.getPriority());
-        
-        // 应用截止日期
-        if (currentParsedTask.getDueDate() != null) {
-            selectedDueDate = currentParsedTask.getDueDate();
+        // 设置截止日期
+        if (todo.getDueDate() != null) {
+            selectedDueDate = todo.getDueDate();
             selectedCalendar.setTimeInMillis(selectedDueDate);
             updateDateTimeDisplay();
         }
         
-        // 应用子任务
-        List<SubTask> subTasks = currentParsedTask.getSubTasks();
-        if (subTasks != null && !subTasks.isEmpty()) {
-            // 清除现有子任务
-            subTaskTitles.clear();
-            binding.layoutSubtasksContainer.removeAllViews();
-            
-            // 添加AI解析的子任务
-            for (SubTask subTask : subTasks) {
-                subTaskTitles.add(subTask.getTitle());
-                addSubTaskView(subTask.getTitle());
-            }
+        // 设置子任务
+        for (SubTask subTask : todo.getSubTasks()) {
+            addSubTaskView(subTask.getTitle(), subTask.isCompleted());
         }
-        
-        // 隐藏AI结果卡片
-        binding.cardAiResult.setVisibility(View.GONE);
-        
-        Toast.makeText(getContext(), "AI解析结果已应用", Toast.LENGTH_SHORT).show();
     }
     
     private void setPriorityChip(Priority priority) {
@@ -309,7 +179,37 @@ public class AddTodoDialogFragment extends DialogFragment {
         }
     }
     
-    private void addTodo() {
+    private void setupClickListeners() {
+        // 取消按钮
+        binding.btnCancel.setOnClickListener(v -> dismiss());
+        
+        // 保存按钮
+        binding.btnSave.setOnClickListener(v -> saveTodo());
+        
+        // 选择日期时间按钮（合并）
+        binding.btnSelectDatetime.setOnClickListener(v -> showDateTimePicker());
+        
+        // AI模式切换按钮
+        binding.btnToggleAiMode.setOnClickListener(v -> toggleAiMode());
+        
+        // AI输入语音按钮
+        binding.layoutAiInput.setEndIconOnClickListener(view -> startAiVoiceInput());
+        
+        // AI分析按钮
+        binding.btnAiAnalyze.setOnClickListener(v -> performAIAnalysisFromAiInput());
+        
+        // 添加子任务按钮
+        binding.btnAddSubtask.setOnClickListener(v -> addSubTaskInput());
+    }
+    
+    /**
+     * 显示日期时间选择器（先选日期，再选时间）
+     */
+    private void showDateTimePicker() {
+        showDatePicker();
+    }
+    
+    private void saveTodo() {
         String title = binding.etTitle.getText().toString().trim();
         if (title.isEmpty()) {
             binding.etTitle.setError("请输入任务标题");
@@ -320,8 +220,8 @@ public class AddTodoDialogFragment extends DialogFragment {
         Priority priority = getSelectedPriority();
         List<SubTask> subTasks = collectSubTasks();
         
-        if (listener != null) {
-            listener.onTodoAdded(title, description, priority, selectedDueDate, subTasks);
+        if (listener != null && todo != null) {
+            listener.onTodoUpdated(todo.getId(), title, description, priority, selectedDueDate, subTasks);
         }
         
         dismiss();
@@ -379,6 +279,86 @@ public class AddTodoDialogFragment extends DialogFragment {
         dialog.show();
     }
     
+    /**
+     * 更新日期时间显示
+     */
+    private void updateDateTimeDisplay() {
+        if (selectedDueDate != null) {
+            String dateTimeStr = dateTimeFormat.format(new Date(selectedDueDate));
+            binding.tvSelectedDate.setText("📅 " + dateTimeStr);
+            binding.tvSelectedDate.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvSelectedDate.setVisibility(View.GONE);
+        }
+    }
+    
+    /**
+     * 添加子任务输入框
+     */
+    private void addSubTaskInput() {
+        addSubTaskView("", false);
+    }
+    
+    /**
+     * 添加子任务视图
+     */
+    private void addSubTaskView(String title, boolean isCompleted) {
+        View subTaskView = getLayoutInflater().inflate(R.layout.item_subtask_input, binding.layoutSubtasksContainer, false);
+        
+        EditText etSubTaskTitle = subTaskView.findViewById(R.id.et_subtask_title);
+        ImageButton btnRemove = subTaskView.findViewById(R.id.btn_remove_subtask);
+        
+        // 设置标题
+        if (!title.isEmpty()) {
+            etSubTaskTitle.setText(title);
+        }
+        
+        // 删除按钮点击事件
+        btnRemove.setOnClickListener(v -> binding.layoutSubtasksContainer.removeView(subTaskView));
+        
+        binding.layoutSubtasksContainer.addView(subTaskView);
+    }
+    
+    /**
+     * 收集所有子任务
+     */
+    private List<SubTask> collectSubTasks() {
+        List<SubTask> subTasks = new ArrayList<>();
+        
+        for (int i = 0; i < binding.layoutSubtasksContainer.getChildCount(); i++) {
+            View childView = binding.layoutSubtasksContainer.getChildAt(i);
+            EditText etSubTaskTitle = childView.findViewById(R.id.et_subtask_title);
+            
+            String title = etSubTaskTitle.getText().toString().trim();
+            if (!title.isEmpty()) {
+                subTasks.add(new SubTask(title));
+            }
+        }
+        
+        return subTasks;
+    }
+    
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        
+        // 取消正在进行的AI解析任务
+        if (aiParseTask != null && !aiParseTask.isDone()) {
+            aiParseTask.cancel(true);
+        }
+        
+        // 关闭AI解析器
+        if (aiParser != null) {
+            aiParser.shutdown();
+        }
+    }
+    
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -387,7 +367,6 @@ public class AddTodoDialogFragment extends DialogFragment {
             ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (results != null && !results.isEmpty()) {
                 String spokenText = results.get(0);
-                // AI模式语音输入
                 binding.etAiInput.setText(spokenText);
             }
         }
@@ -403,7 +382,6 @@ public class AddTodoDialogFragment extends DialogFragment {
             binding.cardAiMode.setVisibility(View.VISIBLE);
             binding.btnToggleAiMode.setIconResource(android.R.drawable.ic_menu_close_clear_cancel);
             
-            // 隐藏API Key检查（AI模式中显示更友好的错误提示）
             if (aiParser == null) {
                 binding.btnAiAnalyze.setEnabled(false);
                 binding.btnAiAnalyze.setText("⚠️ 请先配置API密钥");
@@ -486,7 +464,7 @@ public class AddTodoDialogFragment extends DialogFragment {
     }
     
     /**
-     * 直接应用AI结果（不显示确认卡片）
+     * 直接应用AI结果
      */
     private void applyAIResultDirectly(ParsedTask parsedTask) {
         if (parsedTask == null) return;
@@ -515,103 +493,12 @@ public class AddTodoDialogFragment extends DialogFragment {
         List<SubTask> subTasks = parsedTask.getSubTasks();
         if (subTasks != null && !subTasks.isEmpty()) {
             // 清除现有子任务
-            subTaskTitles.clear();
             binding.layoutSubtasksContainer.removeAllViews();
             
             // 添加AI解析的子任务
             for (SubTask subTask : subTasks) {
-                subTaskTitles.add(subTask.getTitle());
-                addSubTaskView(subTask.getTitle());
+                addSubTaskView(subTask.getTitle(), subTask.isCompleted());
             }
-        }
-    }
-    
-    /**
-     * 更新日期时间显示
-     */
-    private void updateDateTimeDisplay() {
-        if (selectedDueDate != null) {
-            String dateTimeStr = dateTimeFormat.format(new Date(selectedDueDate));
-            binding.tvSelectedDate.setText("📅 " + dateTimeStr);
-            binding.tvSelectedDate.setVisibility(View.VISIBLE);
-        } else {
-            binding.tvSelectedDate.setVisibility(View.GONE);
-        }
-    }
-    
-    /**
-     * 添加子任务输入框
-     */
-    private void addSubTaskInput() {
-        View subTaskView = getLayoutInflater().inflate(R.layout.item_subtask_input, binding.layoutSubtasksContainer, false);
-        
-        EditText etSubTaskTitle = subTaskView.findViewById(R.id.et_subtask_title);
-        ImageButton btnRemove = subTaskView.findViewById(R.id.btn_remove_subtask);
-        
-        // 删除按钮点击事件
-        btnRemove.setOnClickListener(v -> binding.layoutSubtasksContainer.removeView(subTaskView));
-        
-        binding.layoutSubtasksContainer.addView(subTaskView);
-    }
-    
-    /**
-     * 添加子任务视图（用于AI解析结果）
-     */
-    private void addSubTaskView(String title) {
-        View subTaskView = getLayoutInflater().inflate(R.layout.item_subtask_input, binding.layoutSubtasksContainer, false);
-        
-        EditText etSubTaskTitle = subTaskView.findViewById(R.id.et_subtask_title);
-        ImageButton btnRemove = subTaskView.findViewById(R.id.btn_remove_subtask);
-        
-        // 设置标题
-        etSubTaskTitle.setText(title);
-        
-        // 删除按钮点击事件
-        btnRemove.setOnClickListener(v -> {
-            binding.layoutSubtasksContainer.removeView(subTaskView);
-            subTaskTitles.remove(title);
-        });
-        
-        binding.layoutSubtasksContainer.addView(subTaskView);
-    }
-    
-    /**
-     * 收集所有子任务
-     */
-    private List<SubTask> collectSubTasks() {
-        List<SubTask> subTasks = new ArrayList<>();
-        
-        for (int i = 0; i < binding.layoutSubtasksContainer.getChildCount(); i++) {
-            View childView = binding.layoutSubtasksContainer.getChildAt(i);
-            EditText etSubTaskTitle = childView.findViewById(R.id.et_subtask_title);
-            
-            String title = etSubTaskTitle.getText().toString().trim();
-            if (!title.isEmpty()) {
-                subTasks.add(new SubTask(title));
-            }
-        }
-        
-        return subTasks;
-    }
-    
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
-    
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        
-        // 取消正在进行的AI解析任务
-        if (aiParseTask != null && !aiParseTask.isDone()) {
-            aiParseTask.cancel(true);
-        }
-        
-        // 关闭AI解析器
-        if (aiParser != null) {
-            aiParser.shutdown();
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.tasks.viewmodel;
+package com.example.tasks.ui.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -6,10 +6,10 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.tasks.data.Priority;
-import com.example.tasks.data.SubTask;
-import com.example.tasks.data.Todo;
-import com.example.tasks.repository.TodoRepository;
+import com.example.tasks.data.models.Priority;
+import com.example.tasks.data.models.SubTask;
+import com.example.tasks.data.models.Todo;
+import com.example.tasks.data.repositories.TodoRepository;
 
 import java.util.ArrayList;
 import java.util.List;

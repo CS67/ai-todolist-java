@@ -1,4 +1,4 @@
-package com.example.tasks.adapter;
+package com.example.tasks.ui.adapters;
 
 public interface OnTodoClickListener {
     void onTodoToggle(String todoId);

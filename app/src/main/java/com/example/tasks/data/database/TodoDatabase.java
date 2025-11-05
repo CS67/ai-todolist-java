@@ -1,4 +1,4 @@
-package com.example.tasks.database;
+package com.example.tasks.data.database;
 
 import android.content.Context;
 
@@ -12,7 +12,7 @@ import androidx.room.TypeConverters;
  */
 @Database(
     entities = {TodoEntity.class},
-    version = 3,  // 增加版本号
+    version = 3,
     exportSchema = false
 )
 @TypeConverters({Converters.class})

@@ -1,7 +1,6 @@
-package com.example.tasks.adapter;
+package com.example.tasks.ui.adapters;
 
 import android.graphics.Paint;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +15,9 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tasks.R;
-import com.example.tasks.data.Priority;
-import com.example.tasks.data.SubTask;
-import com.example.tasks.data.Todo;
+import com.example.tasks.data.models.Priority;
+import com.example.tasks.data.models.SubTask;
+import com.example.tasks.data.models.Todo;
 import com.example.tasks.databinding.ItemTodoBinding;
 
 import java.text.SimpleDateFormat;

@@ -1,9 +1,9 @@
-package com.example.tasks.database;
+package com.example.tasks.data.database;
 
 import androidx.room.TypeConverter;
 
-import com.example.tasks.data.Priority;
-import com.example.tasks.data.SubTask;
+import com.example.tasks.data.models.Priority;
+import com.example.tasks.data.models.SubTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

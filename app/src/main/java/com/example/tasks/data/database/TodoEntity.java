@@ -1,4 +1,4 @@
-package com.example.tasks.database;
+package com.example.tasks.data.database;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
@@ -6,8 +6,8 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import com.example.tasks.data.Priority;
-import com.example.tasks.data.SubTask;
+import com.example.tasks.data.models.Priority;
+import com.example.tasks.data.models.SubTask;
 
 import java.util.List;
 

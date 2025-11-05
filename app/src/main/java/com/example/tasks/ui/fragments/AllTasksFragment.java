@@ -1,4 +1,4 @@
-package com.example.tasks.ui;
+package com.example.tasks.ui.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,10 +12,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.tasks.R;
-import com.example.tasks.adapter.OnTodoClickListener;
-import com.example.tasks.adapter.TodoAdapter;
+import com.example.tasks.data.models.Todo;
+import com.example.tasks.ui.adapters.OnTodoClickListener;
+import com.example.tasks.ui.adapters.TodoAdapter;
 import com.example.tasks.databinding.FragmentAllTasksBinding;
-import com.example.tasks.viewmodel.TodoViewModel;
+import com.example.tasks.ui.viewmodel.TodoViewModel;
 
 public class AllTasksFragment extends Fragment {
     private FragmentAllTasksBinding binding;
@@ -92,10 +93,10 @@ public class AllTasksFragment extends Fragment {
         viewModel.getAllTodos().observe(getViewLifecycleOwner(), todos -> {
             if (todos != null) {
                 // 分离未完成和已完成任务
-                java.util.List<com.example.tasks.data.Todo> incompleteTodos = new java.util.ArrayList<>();
-                java.util.List<com.example.tasks.data.Todo> completedTodos = new java.util.ArrayList<>();
+                java.util.List<Todo> incompleteTodos = new java.util.ArrayList<>();
+                java.util.List<Todo> completedTodos = new java.util.ArrayList<>();
 
-                for (com.example.tasks.data.Todo todo : todos) {
+                for (Todo todo : todos) {
                     if (todo.isCompleted()) {
                         completedTodos.add(todo);
                     } else {

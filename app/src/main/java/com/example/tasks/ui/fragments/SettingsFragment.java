@@ -1,9 +1,8 @@
-package com.example.tasks.ui;
+package com.example.tasks.ui.fragments;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.InputType;
-import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.EditTextPreference;

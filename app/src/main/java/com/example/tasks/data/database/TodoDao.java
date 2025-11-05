@@ -1,4 +1,4 @@
-package com.example.tasks.database;
+package com.example.tasks.data.database;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;

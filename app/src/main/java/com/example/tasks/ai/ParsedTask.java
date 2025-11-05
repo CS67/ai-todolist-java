@@ -1,7 +1,7 @@
 package com.example.tasks.ai;
 
-import com.example.tasks.data.Priority;
-import com.example.tasks.data.SubTask;
+import com.example.tasks.data.models.Priority;
+import com.example.tasks.data.models.SubTask;
 
 import java.util.ArrayList;
 import java.util.List;

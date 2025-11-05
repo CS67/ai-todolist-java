@@ -29,7 +29,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TodoList">
         <activity
-            android:name="com.example.tasks.MainActivity"
+            android:name="com.example.tasks.ui.activities.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.TodoList">
@@ -41,17 +41,17 @@
         </activity>
         
         <activity
-            android:name="com.example.tasks.ui.SettingsActivity"
+            android:name="com.example.tasks.ui.activities.SettingsActivity"
             android:exported="false"
             android:label="@string/settings"
-            android:parentActivityName="com.example.tasks.MainActivity"
+            android:parentActivityName="com.example.tasks.ui.activities.MainActivity"
             android:theme="@style/Theme.TodoList" />
         
         <activity
-            android:name="com.example.tasks.ui.CalendarActivity"
+            android:name="com.example.tasks.ui.activities.CalendarActivity"
             android:exported="false"
             android:label="日历视图"
-            android:parentActivityName="com.example.tasks.MainActivity"
+            android:parentActivityName="com.example.tasks.ui.activities.MainActivity"
             android:theme="@style/Theme.TodoList" />
     </application>
 

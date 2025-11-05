@@ -1,4 +1,4 @@
-package com.example.tasks.ui;
+package com.example.tasks.ui.activities;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tasks.R;
 import com.example.tasks.databinding.ActivitySettingsBinding;
+import com.example.tasks.ui.fragments.SettingsFragment;
 
 /**
  * 设置页面
