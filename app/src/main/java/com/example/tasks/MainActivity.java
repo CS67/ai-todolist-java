@@ -171,6 +171,12 @@ public class MainActivity extends AppCompatActivity {
     private void setupClickListeners() {
         binding.fabAddTodo.setOnClickListener(v -> showAddTodoDialog());
         
+        // 设置按钮
+        binding.btnSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
+        
         // 未完成分类折叠/展开
         binding.headerIncomplete.setOnClickListener(v -> toggleIncompleteSection());
         
@@ -238,26 +244,6 @@ public class MainActivity extends AppCompatActivity {
             viewModel.updateTodo(todoId, title, description, priority, dueDate, subTasks);
         });
         dialog.show(getSupportFragmentManager(), "EditTodoDialog");
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_clear_completed) {
-            viewModel.clearCompletedTodos();
-            return true;
-        } else if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

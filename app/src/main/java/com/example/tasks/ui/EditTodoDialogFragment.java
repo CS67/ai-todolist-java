@@ -110,6 +110,7 @@ public class EditTodoDialogFragment extends DialogFragment {
         }
         
         setupClickListeners();
+        checkAutoAIMode();
     }
     
     private void initializeAI() {
@@ -118,6 +119,21 @@ public class EditTodoDialogFragment extends DialogFragment {
         
         if (!apiKey.isEmpty()) {
             aiParser = new AITaskParser(apiKey);
+        }
+    }
+    
+    /**
+     * 检查是否自动开启AI模式
+     */
+    private void checkAutoAIMode() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        boolean autoAiParse = prefs.getBoolean("auto_ai_parse", false);
+        
+        if (autoAiParse && aiParser != null) {
+            // 自动开启AI模式
+            isAiModeEnabled = true;
+            binding.cardAiMode.setVisibility(View.VISIBLE);
+            binding.btnToggleAiMode.setIconResource(android.R.drawable.ic_menu_close_clear_cancel);
         }
     }
     
